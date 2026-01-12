@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Markdown Parser</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        #output {
+            border: 1px solid #ddd;
+            padding: 20px;
+            min-height: 400px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Streaming Markdown Parser Demo</h1>
+    
+    <div class="controls">
+        <button id="startBtn">Start Streaming</button>
+        <button id="resetBtn">Reset</button>
+    </div>
+    
+    <div id="output"></div>
+
+    <script src="MarkdownParser.js"></script>
+    <script>
+        const sampleMarkdown = `Hello! This is a streaming markdown demo.
+
+Here's some inline code: \`console.log("Hello")\` and more text.
+
+Now let's try a code block:
+
+\`\`\`javascript
+function greet(name) {
+    return "Hello, " + name;
+}
+\`\`\`
+
+And here's more inline code: \`const x = 42\` followed by normal text.
+
+Another code block:
+
+\`\`\`python
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+\`\`\`
+
+Mix it up: \`code1\` normal \`code2\` more normal.
+
+Done!`;
+
+        const output = document.getElementById('output');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        let parser;
+        let streaming = false;
+
+        function reset() {
+            output.innerHTML = '';
+            parser = new MarkdownParser(output);
+            streaming = false;
+            startBtn.disabled = false;
+        }
+
+        function simulateStreaming() {
+            if (streaming) return;
+            
+            streaming = true;
+            startBtn.disabled = true;
+            
+            let index = 0;
+            
+            const interval = setInterval(() => {
+                if (index >= sampleMarkdown.length) {
+                    clearInterval(interval);
+                    streaming = false;
+                    startBtn.disabled = false;
+                    return;
+                }
+                
+                const size = Math.floor(Math.random() * 10) + 1;
+                const chunk = sampleMarkdown.substring(index, index + size);
+                index += size;
+                
+                parser.processChunk(chunk);
+                
+            }, 50);
+        }
+
+        startBtn.addEventListener('click', simulateStreaming);
+        resetBtn.addEventListener('click', reset);
+
+        reset();
+    </script>
+</body>
+</html>
